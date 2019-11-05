@@ -156,6 +156,31 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         />
+    <Chronometer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chronometer3"
+        android:textSize="12pt"
+        app:layout_constraintTop_toBottomOf="@+id/chronometer2"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+    <Switch
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chronometer3"
+        android:id="@+id/timerswitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </Switch>
+    <Button
+        android:id="@+id/settimer"
+        android:text="set time limit"
+        app:layout_constraintBottom_toTopOf="@+id/submit"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </Button>
     <Button
         android:id="@+id/submit"
         android:layout_width="wrap_content"
