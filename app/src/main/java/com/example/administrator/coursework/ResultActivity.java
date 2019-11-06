@@ -10,12 +10,14 @@ import android.widget.TextView;
 public class ResultActivity extends AppCompatActivity {
     private TextView result1;
     private Button send;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
         result1=(TextView)findViewById(R.id.result1);
         send=(Button)findViewById(R.id.send);
+
         Intent intent=getIntent();
         String res=intent.getStringExtra("result");
         final int fails=intent.getIntExtra("fails",0);
@@ -33,5 +35,6 @@ public class ResultActivity extends AppCompatActivity {
                 startActivity(shareIntent);
             }
         });
+
     }
 }

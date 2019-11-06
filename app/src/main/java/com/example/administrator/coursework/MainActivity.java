@@ -1,7 +1,10 @@
 package com.example.administrator.coursework;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -29,12 +32,15 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox box5;
     private CheckBox box6;
     private TextView countnum;
+    private TextView counttime;
     private Chronometer chronometer1;
     private Chronometer chronometer2;
-    private Chronometer chronometer3;
+
     private long recordtime=0;
     private int count=4;
-    private String time_set;
+    public static String time_set;
+    private boolean timer_is_set=false;
+    private boolean clock_is_using=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         init();
 
         countnum.setText(String.valueOf(count));
+        IntentFilter intentFilter=new IntentFilter();
+        intentFilter.addAction("changeTime");
+        registerReceiver(broadcastReceiver,intentFilter);
         submit.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -64,14 +73,14 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("result","you passed");
                         intent.putExtra("fails",3-count);
                         startActivity(intent);
-                        finish();
+
                     }
                     else{
                         Intent intent=new Intent(MainActivity.this,ResultActivity.class);
                         intent.putExtra("result","you failed");
                         intent.putExtra("fails",4-count);
                         startActivity(intent);
-                        finish();
+
                     }
                 }
             }
@@ -103,37 +112,28 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 if (!mname_edit.getText().toString().equals("")) {
                                     time_set = mname_edit.getText().toString();
-                                    chronometer3.setBase(SystemClock.elapsedRealtime());
-
-                                    chronometer3.start();
+                                    timer_is_set=true;
+                                    counttime.setText(time_set);
+                                    startService(new Intent(MainActivity.this,MyService.class));
                                 }
                             }
                         }).show();
 
             }
         });
-        chronometer3.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-            @Override
-            public void onChronometerTick(Chronometer chronometer) {
-                if(SystemClock.elapsedRealtime() - chronometer3.getBase() > Integer.valueOf(time_set) * 1000){
-                    chronometer3.stop();
-                    Intent intent=new Intent(MainActivity.this,ResultActivity.class);
-                    intent.putExtra("result","you failed");
-                    intent.putExtra("fails",4-count);
-                    startActivity(intent);
-                }
-            }
-        });
+
         timerswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){
+                    clock_is_using=true;
                     chronometer1.setBase(SystemClock.elapsedRealtime());
                     chronometer2.setBase(SystemClock.elapsedRealtime());
                     chronometer1.start();
                     chronometer2.start();
                 }
                 else {
+                    clock_is_using=false;
                     chronometer1.stop();
                     chronometer1.setBase(SystemClock.elapsedRealtime());
                     chronometer2.stop();
@@ -141,8 +141,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
 
+    }
+    private BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(Integer.valueOf(time_set)==0){
+                stopService(new Intent(MainActivity.this,MyService.class));
+                Intent intent1=new Intent(MainActivity.this,ResultActivity.class);
+                intent1.putExtra("result","you failed");
+                intent1.putExtra("fails",4-count);
+                startActivity(intent1);
+            }
+            counttime.setText(time_set);
+        }
+    };
     @Override
     protected void onStop() {
         super.onStop();
@@ -153,18 +166,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(recordtime!=0){
+        if(recordtime!=0&&clock_is_using){
             chronometer2.setBase(chronometer2.getBase()+SystemClock.elapsedRealtime()-recordtime);
             chronometer2.start();
         }
         else {
             chronometer2.setBase(SystemClock.elapsedRealtime());
         }
+        if(timer_is_set&&Integer.valueOf(time_set)==0){
 
+            stopService(new Intent(MainActivity.this,MyService.class));
+            Intent intent1=new Intent(MainActivity.this,ResultActivity.class);
+            intent1.putExtra("result","you failed");
+            intent1.putExtra("fails",4-count);
+            startActivity(intent1);
+        }
     }
 
     void init(){
         countnum=(TextView)findViewById(R.id.count);
+        counttime=(TextView)findViewById(R.id.counttime);
         submit=(Button)findViewById(R.id.submit);
         tofill=(Button)findViewById(R.id.tofillin);
         box1=(CheckBox)findViewById(R.id.box1);
@@ -175,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         box6=(CheckBox)findViewById(R.id.box6);
         chronometer1=(Chronometer)findViewById(R.id.chronometer1);
         chronometer2=(Chronometer)findViewById(R.id.chronometer2);
-        chronometer3=(Chronometer)findViewById(R.id.chronometer3);
+
         timerswitch=(Switch)findViewById(R.id.timerswitch);
         settimer=(Button)findViewById(R.id.settimer);
     }
